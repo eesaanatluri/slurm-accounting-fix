@@ -8,15 +8,19 @@ To fix jobs accumulating runtime infinitely because they do not have end times.
 
 #### Steps to Restore the slurmDB
 Start your mysql by logging in as root. You will be presented with a mysql prompt.
+
 `mysql -u root`
 
 Create a slurm database before you try to restore from the mysql dumpfile.
+
 `create database slurm_acct_db;`
 
 Make sure you have the database listed.
+
 `show databases;`
 
 Restore the database by using the following command.
+
 `mysql slurm_acct_db -u root < <path to your DB dumpfile>`
 
 #### Usage
