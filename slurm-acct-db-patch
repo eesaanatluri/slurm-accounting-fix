@@ -5,7 +5,7 @@ while read eachline; do
      start_time=`echo $eachline | cut -d '|' -f5`
      start_time_epoch=`echo $(date +%s --date="$start_time")`
      resvcpuraw=`echo $eachline | cut -d '|' -f7`
-     correct_end_time=$(($start_time_epoch + $resvcpuraw))
+     correct_end_time=$((start_time_epoch + resvcpuraw))
      formatted_correct_end_time=`echo $(date +%Y-%m-%dT%H:%M:%S --date="@$correct_end_time")`
      #echo $jobid'|'$start_time'|'$resvcpuraw'|'$formatted_correct_time
 
