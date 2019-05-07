@@ -10,15 +10,24 @@ while read eachline; do
      #echo $jobid'|'$start_time'|'$resvcpuraw'|'$formatted_correct_time
 
      jobid=`echo $eachline | cut -d '|' -f1`
-     regex='[0-9]{1,}_[0-9]{1,}'     # Regex to find the array jobs
+     regex='[0-9]{1,}_[0-9]{1,}\.*([a-z]{1,}|[0-9]{1,})'    # Regex to find the array jobs
 
-     if [[ $jobid =~ $regex ]]; # If it's an array job split into taskID and RawJobID
+  if [[ $jobid =~ $regex ]]; # If it's an array job split into taskID and RawJobID
      then
        #echo ${BASH_REMATCH[1]}
        raw_job_id=`echo $jobid | cut -d '_' -f1`
-       id_array_task=`echo $jobid | cut -d '_' -f2`
-       echo UPDATE slurm_cluster_job_table SET time_end="$correct_end_time" WHERE id_array_job="$raw_job_id" && id_array_task="$id_array_task";
-       echo -e "\n"
+       id_array_task=`echo $jobid | cut -s -d '_' -f2`
+       id_step=`echo $jobid | cut -s -d '.' -f2`
+       echo UPDATE slurm_cluster_job_table SET time_end="$correct_end_time" WHERE id_array_job="$raw_job_id" \&\& id_array_task="$id_array_task";
+       if [ $id_step ]; then
+           if [ $id_step == 'batch' ] ; then
+              id_step=-2
+           else
+              id_step=-1
+           fi
+       echo UPDATE slurm_cluster_step_table SET st.time_end="$correct_end_time" FROM slurm_cluster_job_table as jt INNER JOIN slurm_cluster_step_table as st WHERE jt.id_array_job="$raw_job_id" \&\& jt.id_array_task="$id_array_task" \&\& st.id_step="$id_step" and jt.job_db_inx=st.job_db_inx;
+       fi
+       echo -e "\n" # To be removed before using in prod.
   else
      echo UPDATE slurm_cluster_job_table SET time_end="$correct_end_time" WHERE id_job="$jobid";
   fi
