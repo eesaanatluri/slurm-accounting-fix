@@ -37,7 +37,7 @@ Restore the database by using the following command.
 
   `SELECT COUNT(id_array_task) FROM slurm_cluster_job_table as jt JOIN slurm_cluster_step_table as st WHERE (jt.state=3 or jt.state=5) and st.time_end IS NOT NULL and st.time_end=0 and jt.time_end=0 and jt.job_db_inx=st.job_db_inx;`
 
-***List of task_ids for ghost jobs that have id_step in step_table *** 
+***List of task_ids for ghost jobs that have id_step in step_table*** 
 
   `SELECT GROUP_CONCAT(id_array_task) FROM slurm_cluster_job_table as jt JOIN slurm_cluster_step_table as st WHERE (jt.state=3 or jt.state=5) and st.time_end IS NOT NULL and st.time_end=0 and jt.time_end=0 and jt.job_db_inx=st.job_db_inx;`
 
