@@ -26,7 +26,7 @@ Create a slurm database (with the same name mentioned in slurm_acct_db attribute
 
 Restore the database by using the following command.
 
-`mysql <slurm_acct_db> -u root < <path to your DB dumpfile>`
+`mysql <slurm_acct_db> -u root < <path to your DB dumpfile>;`
 
 
 ## Patch
@@ -59,7 +59,7 @@ Restore the database by using the following command.
 `UPDATE slurm_cluster_job_table SET time_end=time_start WHERE id_job in ( < Comma separated list of jobIDs from last step> );`
 
 
-**NOTE:** Don't forget `COMMIT;` or `ROLLBACK;`  after you checked if the desired patch applied successfully.
+> Don't forget `COMMIT;` or `ROLLBACK;`  after you checked if the desired patch applied successfully.
 
 
 ## DEPRECATED
