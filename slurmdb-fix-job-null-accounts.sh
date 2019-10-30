@@ -2,17 +2,12 @@
 
 while read -r line
 do
-
 	uid=`echo $line | cut -d ',' -f1`
-	slurm_acct_name=`echo $line | cut -d ',' -f2`
-
-	total_jobs=`mysql -N -u root -D slurmdb -e "select count(1) from ohpc_job_table where id_user=$uid and account IS NULL;"`
-
-	#printf "User $slurm_acct_name with user ID $uid has $total_jobs jobs with account name null \n"
-
-	#printf "Updating $total_jobs records for user $slurm_acct_name with user ID $uid \n"
-
-	printf "UPDATE ohpc_job_table SET account=\'$slurm_acct_name\' WHERE id_user=$uid and account IS NULL;\n"
-
-	#mysql -u root -D slurmdb -e \"UPDATE ohpc_job_table SET account=$slurm_acct_name WHERE id_user=$uid and account IS NULL;\"
+	slurm_user_name=`echo $line | cut -d ',' -f2`
+	data1=$(mysql -u root -D slurmdb<<<"SELECT distinct(id_assoc) , acct, user  FROM ohpc_assoc_table  where user='$slurm_user_name';")
+	id_assoc=`echo $data1 | cut -d ' ' -f4`
+	acct=`echo $data1 | cut -d ' ' -f5`
+	user=`echo $data1 | cut -d ' ' -f6`
+	data1=$(mysql -u root -D slurmdb<<<"UPDATE ohpc_job_table  set id_assoc='$id_assoc' where id_user='$uid' and id_assoc=0;\
+UPDATE ohpc_job_table  set account='$acct' where id_user='$uid' and account='';") 
 done<"$1"
