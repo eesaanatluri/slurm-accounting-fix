@@ -1,7 +1,7 @@
 ## Steps to fix slurmdb for jobs not having account names.
 
 ### Introduction
-The goal here is to fix the NULL entries in the account column for the jobs that ran when the slurm accounts were not set. This causes an issue in XDMoD, when we try to view the job metrics, they would be categorized into an unknown category. 
+The goal here is to fix the NULL entries in the account column and update the id_assoc for the jobs that ran when the slurm accounts were not set. This causes an issue in XDMoD, when we try to view the job metrics, they would be categorized into a Null name. 
 
 If you would like to follow along, get yourself a test environment by following the instructions from the Setup section of the [README.md]([https://github.com/eesaanatluri/slurm-accounting-fix/blob/master/README.md](https://github.com/eesaanatluri/slurm-accounting-fix/blob/master/README.md))
  
@@ -14,10 +14,10 @@ Total no. of jobs having account column null. These jobs need to be fixed.
 +----------+
 Note: 1441083600 is epoch timestamp for 2015-09-01 (When we started using Slurm at UAB.) 
 
-Get unique uids of jobs that ran without a slurm account defined.
+Get unique uids of jobs that needs to be fixed.
 ```
-mysql -N slurmdb -u root -e "select distinct(id_user) from ohpc_job_table where time_start>1441083600 and account IS NULL order by id_user;" > fix-uids.txt
- ```
+mysql -N slurmdb -u root -e "select distinct(id_user) from ohpc_job_table where id_assoc = 0 or account IS NULL order by id_user;" > fix-uids.txt
+```
 
 Move the file having a list of uids to Cheaha to get their usernames.
 > The following two steps should run on Mac
@@ -42,14 +42,11 @@ rsync fix-uids-name.csv centos@164.111.161.164:~
 
 ### Usage
 
-Prepare sql script containing update statements.
+Apply the fix
 ```
-./slurmdb-fix-job-null-accounts.sh fix-uids-name.csv > slurmdb-fix-job-null-accounts.sql
+./slurmdb-fix-job-null-accounts.sh fix-uids-name.csv
 ```
-Apply the fix 
-```
-mysql -u root -D slurmdb < slurmdb-fix-job-null-accounts.sql
-```
+
 ### Test
 
 You can confirm that the DB is fixed by running the following command
