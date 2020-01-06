@@ -3,6 +3,7 @@
 total_jobs=`mysql -N -u root -D slurmdb -e "select count(1) from ohpc_job_table where account IS NULL or id_assoc=0;"`
 echo "Total number of jobs to be updated = $total_jobs"
 if [ $total_jobs = "0" ]; then
+	echo "Nothing to fix ! Exiting ... "
 	exit 1
 fi
 total_jobs_updated=0
