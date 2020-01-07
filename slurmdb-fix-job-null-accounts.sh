@@ -16,7 +16,8 @@ do
 	progress=$(( total_jobs_updated*100/total_jobs ))
 	echo -en "\rPROGRESS: $progress %"
 	if [ $progress = "100" ]; then
-					break;
+		mysql -N -u root -D slurmdb -e "COMMIT;"
+		break;
 	fi
 
 	uid=`echo $line | cut -d ',' -f1`
