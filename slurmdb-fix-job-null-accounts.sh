@@ -16,7 +16,10 @@ do
 	progress=$(( total_jobs_updated*100/total_jobs ))
 	echo -en "\rPROGRESS: $progress %"
 	if [ $progress = "100" ]; then
-		mysql -N -u root -D slurmdb -e "COMMIT;"
+		total_jobs=`mysql -N -u root -D slurmdb -e "select count(1) from ohpc_job_table where account IS NULL or id_assoc=0;"`
+		if [ $total_jobs = "0" ]; then
+			mysql -N -u root -D slurmdb -e "COMMIT;"
+		fi
 		break;
 	fi
 
