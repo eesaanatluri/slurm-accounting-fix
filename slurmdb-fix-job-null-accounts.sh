@@ -8,6 +8,8 @@ if [ $total_jobs = "0" ]; then
 fi
 total_jobs_updated=0
 
+mysql -N -u root -D slurmdb -e "START TRANSACTION"
+
 while read -r line
 do
 
