@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+task_id_count=`mysql -N -D slurmdb -u root -e "SELECT COUNT(id_array_task) FROM ohpc_job_table AS jt JOIN ohpc_step_table AS st WHERE (jt.state=3 or jt.state=5) AND st.time_end IS NOT NULL AND st.time_end=0 AND jt.time_end=0 AND jt.job_db_inx=st.job_db_inx;"`
+
+if [ "$task_id_count" != "0" ]; then
+	task_id_list=`mysql -N -D slurmdb -u root -e "SELECT GROUP_CONCAT(id_array_task) FROM ohpc_job_table AS jt JOIN ohpc_step_table AS st WHERE (jt.state=3 or jt.state=5) AND st.time_end IS NOT NULL AND st.time_end=0 AND jt.time_end=0 AND jt.job_db_inx=st.job_db_inx;"`
+
+	echo "$task_id_list"
+
+	mysql -D slurmdb -u root -e "START TRANSACTION; UPDATE ohpc_step_table AS st INNER JOIN ohpc_job_table AS jt ON st.job_db_inx=jt.job_db_inx SET st.time_end=st.time_start WHERE id_array_job=1001131 AND id_array_task IN ( $task_id_list );"
+
+else 
+	echo "nothing to fix in step table"
+fi
+
+
+job_id_count=`mysql -N -D slurmdb -u root -e "SELECT COUNT(id_job) FROM ohpc_job_table AS jt WHERE (jt.state=3 OR jt.state=5) AND jt.time_end=0;"`
+
+if [ "$job_id_count" != "0" ]; then
+	job_id_list=`mysql -N -D slurmdb -u root -e "SELECT GROUP_CONCAT(id_job) FROM ohpc_job_table WHERE (state=3 OR state=5) AND time_end=0;"`
+
+	echo "$job_id_list"
+
+	mysql -u root slurmdb -e "UPDATE ohpc_job_table SET time_end=time_start WHERE id_job in ( $job_id_list );" 
+	
+	task_id_count=`mysql -D slurmdb -u root -e "SELECT COUNT(id_array_task) FROM ohpc_job_table AS jt JOIN ohpc_step_table AS st WHERE (jt.state=3 OR jt.state=5) AND st.time_end IS NOT NULL AND st.time_end=0 AND jt.time_end=0 AND jt.job_db_inx=st.job_db_inx;"`
+	job_id_count= mysql -D slurmdb -u root -e "SELECT COUNT(id_job) FROM ohpc_job_table as jt WHERE (jt.state=3 OR jt.state=5) AND jt.time_end=0;"
+	if [ $job_id_count == "0" && task_id_count == "0" ]; then
+		echo "Patch applied successfully. Committing the transaction"
+		mysql -D slurmdb -u root -e "COMMIT;"
+	else
+		echo "Patch failed. Rolling back the transaction"
+		mysql -D slurmdb -u root -e "ROLLBACK;"
+	fi
+else 
+	echo "nothing to fix in job table"
+fi
