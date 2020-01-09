@@ -19,6 +19,8 @@ do
 		total_jobs=`mysql -N -u root -D slurmdb -e "select count(1) from ohpc_job_table where account IS NULL or id_assoc=0;"`
 		if [ $total_jobs = "0" ]; then
 			mysql -N -u root -D slurmdb -e "COMMIT;"
+		else
+			echo "Patch failed"
 		fi
 		break;
 	fi
