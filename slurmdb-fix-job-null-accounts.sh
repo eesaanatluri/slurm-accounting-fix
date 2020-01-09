@@ -36,7 +36,7 @@ do
 	##Updating the missing data in the table in two statements because in some of the cases id_assoc is missing but account name is present.
 	row_count_id_0=`mysql -N -u root -D slurmdb -e "UPDATE ohpc_job_table  set id_assoc='$id_assoc' where id_user='$uid' and id_assoc=0;\
 		SELECT ROW_COUNT();"`
-	row_count_accnt=`mysql -N -u root -D slurmdb -e "UPDATE ohpc_job_table  set account='$acct' where id_user='$uid' and account='' or account IS NULL;\
+	row_count_accnt=`mysql -N -u root -D slurmdb -e "UPDATE ohpc_job_table  set account='$acct' where id_user='$uid' and account IS NULL;\
 		SELECT ROW_COUNT();"`
 
 	total_jobs_updated=$(( total_jobs_updated+row_count_accnt+row_count_id_0 ))
